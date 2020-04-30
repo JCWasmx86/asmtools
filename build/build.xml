@@ -23,7 +23,7 @@ Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
 or visit www.oracle.com if you need additional information or have any
 questions.
 -->
-
+<!-- 30th April JCWasmx86: Added target "compileLaunchers" and modified clean to execute "make clean"-->
 
 <project name="asmtools" default="build" basedir=".">
 
