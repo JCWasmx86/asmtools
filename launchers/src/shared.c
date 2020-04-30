@@ -6,15 +6,19 @@
 static char* errorCodeToString(jint e);
 int execute(int argc,char** argv,char* className){
 	int returnValue=EXIT_SUCCESS;
-	JavaVM *jvm=malloc(sizeof(struct JNIInvokeInterface_));
-	JNIEnv *env=malloc(sizeof(struct JNINativeInterface_));
+	JavaVM *jvm=NULL;
+	JNIEnv *env;
 	JavaVMInitArgs vm_args;
-	JavaVMOption * options=calloc(2,sizeof(struct JavaVMOption));
+	JavaVMOption * options=calloc(1,sizeof(struct JavaVMOption));
 	if(options==NULL){
 		fputs("Out of memory!",stderr);
 		return EXIT_FAILURE;
 	}
 	size_t lenClasspath=strlen("-Djava.class.path=");
+	if(getenv("CLASSPATH")==NULL){
+		fputs("Please set CLASSPATH!\n",stderr);
+		goto cleanup;
+	}
 	size_t lenEnvironmentVariable=strlen(getenv("CLASSPATH"));
 	options[0].optionString=calloc(lenClasspath+lenEnvironmentVariable+1,1);//+1 for the null terminator
 	if(options[0].optionString==NULL){
@@ -58,7 +62,9 @@ int execute(int argc,char** argv,char* className){
 	(*env)->CallStaticVoidMethod(env,jasmClass,mainMethodID,args);
 	
 	cleanup:
-	{//TODO. This is ugly.
+	free(options[0].optionString);
+	free(options);
+	if(jvm!=NULL){
 		jint returnValueOfJVMDestruction=(*jvm)->DestroyJavaVM(jvm);
 		if(returnValueOfJVMDestruction!=JNI_OK){
 			fputs("An error occurred while destroying the JVM!",stderr);
