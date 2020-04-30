@@ -68,6 +68,7 @@ questions.
     <property name="build.bin.dir" location="${buildArea.dir}/bin"/>
     <property name="build.src.classes.dir" location="${buildArea.dir}/src"/>
     <property name="build.lib.dir" location="${buildArea.dir}/lib"/>
+    <property name="build.bin.dir" location="${buildArea.dir}/bin"/>
     <property name="build.doc.dir" location="${buildArea.dir}/doc"/>
     <property name="build.javadoc.dir" location="${build.base.dir}/javadoc"/>
     <property name="build.javadocreport.dir" location="${build.base.dir}/javadoc-report"/>
@@ -125,6 +126,12 @@ Other values for TARGET are:
     <target name="clean" description="Remove all generated files.">
         <delete dir="${build.temp.dir}" />
         <delete dir="${build.base.dir}" />
+		<exec executable="make">
+			<arg value="CURDIR=${basedir}/../launchers" />
+			<arg value="-f"/>
+			<arg value="${basedir}/../launchers/Makefile"/>
+			<arg value="clean" />
+		</exec>
     </target>
 
     <!--========================================================================-->
@@ -162,7 +169,7 @@ Other values for TARGET are:
         <mkdir dir="${build.src.classes.dir}"/>
         <mkdir dir="${build.lib.dir}"/>
         <mkdir dir="${build.doc.dir}"/>
-
+        <mkdir dir="${build.bin.dir}"/>
         <mkdir dir="${build.src.dir}" />
         <copy todir="${build.src.dir}">
             <fileset dir="${ws.src.classes.dir}/" includes="**/*" />
@@ -220,7 +227,7 @@ Other values for TARGET are:
 
     <target name="build"  depends="release" description="Build the asmtools product." />
 
-    <target name="release" depends="devbuild, examples, releaseproduct"/>
+    <target name="release" depends="devbuild, compileLaunchers, examples, releaseproduct"/>
 
     <target name="devbuild"  depends="prepare, replace-tokens, jar, javadoc"/>
 
@@ -230,8 +237,20 @@ Other values for TARGET are:
     <!-- Binaries / Libraries                                                   -->
     <!--========================================================================-->
 
-    <!-- Jar file                            -->
-
+    
+	<target name="compileLaunchers">
+		<exec executable="make">
+			<arg value="CURDIR=${basedir}/../launchers" />
+			<arg value="-f"/>
+			<arg value="${basedir}/../launchers/Makefile"/>
+		</exec>
+		<copy file="${basedir}/../launchers/bin/jasm" todir="${build.bin.dir}"/>
+		<copy file="${basedir}/../launchers/bin/jcdec" todir="${build.bin.dir}"/>
+		<copy file="${basedir}/../launchers/bin/jcoder" todir="${build.bin.dir}"/>
+		<copy file="${basedir}/../launchers/bin/jdis" todir="${build.bin.dir}"/>
+	</target>
+	
+	<!-- Jar file                            -->
     <target name="jar" depends="compileClasses">
         <mkdir dir="${build.lib.dir}"/>
         <copy file="${ws.top.dir}/LICENSE" todir="${build.classes.dir}"/>
